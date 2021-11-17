@@ -1,15 +1,63 @@
-export const plus = (a, b) => {
-    return a + b;
+import React, { useContext, useReducer } from "react";
+
+const Calc = React.createContext();
+
+export const useCalc = () => {
+    return useContext(Calc);
 }
 
-export const minus = (a, b) => {
-    return a - b;
+const OPERATORS = { 
+    '+': (a, b) => a + b, 
+    '-': (a, b) => a - b, 
+    '*': (a, b) => a * b, 
+    '/': (a, b) => a / b
 }
 
-export const multiply = (a, b) => {
-    return a!== 0 && b !== 0 ? a / b : 0;
+const calculate = (left, right, operator) => {
+
+    const math = OPERATORS[operator];
+    return math(left, right);
 }
 
-export const items = (a, b) => {
-    return a * b;
+const parse = (expression) => {
+    const keyOperator = (operator) => expression.includes(operator, 1);
+    const currentOperator = Object.keys(OPERATORS).filter(keyOperator);
+    const operands = expression.split(currentOperator);
+    
+    if (operands.length === 1) {
+        const [right] = operands;
+        return [0, parseFloat(right), currentOperator]
+    }
+
+    const [left, right] = operands;
+    return [parseFloat(left), parseFloat(right), currentOperator];
 }
+
+const reducer = (state, action) => {
+    switch (action.type) {
+        case 'calc': return {result: calculate(action.left, action.right, action.operator)};
+        default: return state;
+    }
+}
+
+export const CalcProvider = ({ children }) => {
+    const [state, dispatch] = useReducer(reducer, {
+        result: 0
+    });
+
+    const calc = expression => {
+        const [left, right, operator] = parse(expression);
+        dispatch({ type: 'calc',  left, right, operator});
+    }
+
+
+    return (
+        <Calc.Provider value={{
+            result: state.result,
+            calc
+        }}>
+            {children}
+        </Calc.Provider>
+    )
+}
+

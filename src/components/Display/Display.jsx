@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {cl_ds} from './display.module.css'
 
-const Display = ({word}) => {
-    const [message, setMessage] = useState('');
-
-    
+const Display = ({result}) => {
     return (
         <div className={cl_ds}>
-            {word}
+            {result}
         </div>
     )
 }
